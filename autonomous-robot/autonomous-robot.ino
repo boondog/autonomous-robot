@@ -116,6 +116,39 @@ void loop()
   Serial.print(rightDistInCent);
   Serial.println("cm");
 
+
+  // Open area pounce mode
+  if(leftDistInCent > 200 && rightDistInCent > 200 && distInCentimeters > 200 &&
+     leftDistInCent!= 999 && rightDistInCent!= 999 && distInCentimeters!= 999)
+  {
+    ST.motor(LEFT_WHEEL, 0);
+    ST.motor(RIGHT_WHEEL, 0);
+
+    do{
+      distInCentimeters = ping_cm_BugFix(sonar, CENTER_ECHO_PIN);
+      leftDistInCent    = ping_cm_BugFix(left_sonar, LEFT_ECHO_PIN);
+      rightDistInCent   = ping_cm_BugFix(right_sonar, RIGHT_ECHO_PIN);
+
+      Serial.println("Waiting to pounce...");
+
+      // Print distance for debug (0 = outside set distance range)
+      Serial.print("Center: ");
+      Serial.print(distInCentimeters);
+      Serial.println("cm");
+
+      Serial.print("Left: ");
+      Serial.print(leftDistInCent);
+      Serial.println("cm");
+
+      Serial.print("Right: ");
+      Serial.print(rightDistInCent);
+      Serial.println("cm");
+
+      execute_random();
+      
+    }while(leftDistInCent > 100 && rightDistInCent > 100 && distInCentimeters > 100);
+  }
+
   // If there's something left nudge right
   if(leftDistInCent < 10)
   {
@@ -183,6 +216,7 @@ void execute_random()
     talk();
   }
 }
+
 // This is a wrapper function that tries to avoid a bug with the
 // HC-SR04 modules where they can get stuck return zero forever
 int ping_cm_BugFix(NewPing sensor, int echo_pin){
@@ -197,6 +231,10 @@ int ping_cm_BugFix(NewPing sensor, int echo_pin){
           pinMode(echo_pin, INPUT);
         }
 
+        if(distCm == 0){
+          distCm = 999;
+        }
+      
         return distCm;
 }
 
